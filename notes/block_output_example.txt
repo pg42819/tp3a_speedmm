@@ -1,0 +1,42 @@
+
+[pg42819@compute-662-5 wa1]$ bin/matrix_2 -s 3200 -b 64 --ijk
+Config:
+Input file        : (null)
+Output file       : (null)
+Test file         : (null)
+Metrics file      : (null)
+Matrix size       : 3200
+Loop order        : ijk
+Identity (vs ones): 0
+Transpose         : 0
+Test equal cols   : 0
+Test reverse rows : 0
+Flags:
+debug       : 0
+quiet       : 0
+silent      : 0
+verbose     : 0
+papi_ignore : 0
+
+Generating random data for matrix A
+Using 1.0-filled matrix data for matrix B
+PAPI library initialization succeeded with version: 84213760
+All provided codes exist on the platform
+PAPI event set creation succeeded
+PAPI add events succeeded
+PAPI proceeding with hardware counters available: 11
+
+
+label,size,total_micro_seconds,FLOPs,GFLOPs_per_second,order_name,transpose,max_threads,omp_schedule,omp_chunk_size,test_results,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_TOT_INS
+no-label,3200,56240564,65536000000,1.165280,ijk,0,0,0,4206871,untested,15458836867,52853036,4809767,267352078147
+
+PAPI counter [  PAPI_L1_DCM ] Level 1 data cache misses           = 15458836867
+PAPI counter [  PAPI_L2_DCM ] Level 2 data cache misses           = 52853036
+PAPI counter [  PAPI_L3_TCM ] Level 3 cache misses                = 4809767
+PAPI counter [ PAPI_TOT_INS ] Instructions completed              = 267352078147
+
+Time to multiply : 56240564 microseconds
+FLOPs/second     : 1.165280
+
+(hide these messages with --silent)
+

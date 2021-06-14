@@ -1,0 +1,33 @@
+# with -O1 the report shows:
+
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Begin optimization report for: new_metrics()
+
+    Report from: Vector optimizations [vec]
+
+remark #15320: routine skipped: loop optimizations disabled
+===========================================================================
+
+Begin optimization report for: omp_debug(char *)
+
+    Report from: Offload optimizations [offload]
+
+remark #15320: routine skipped: loop optimizations disabled
+===========================================================================
+
+Begin optimization report for: omp_schedule_kind(int *)
+
+    Report from: Offload optimizations [offload]
+
+remark #15320: routine skipped: loop optimizations disabled
+===========================================================================
+
+Begin optimization report for: print_headers(FILE *, char **, int)
+
+    Report from: Offload optimizations [offload]
+
+remark #15320: routine skipped: loop optimizations disabled
+===========================================================================

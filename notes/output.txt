@@ -1,0 +1,42 @@
+# Typical run output:
+
+[pg42819@compute-662-6 scripts]$ ./simple_run.sh 1  --ijk -s 512
+running /home/pg42819/aa/wa1/bin/matrix_1 --ijk -s 512
+Config:
+Input file        : (null)
+Output file       : (null)
+Test file         : (null)
+Metrics file      : (null)
+Matrix size       : 512
+Loop order        : ijk
+Identity (vs ones): 0
+Transpose         : 0
+Test equal cols   : 0
+Test reverse rows : 0
+Flags:
+debug       : 0
+quiet       : 0
+silent      : 0
+verbose     : 0
+papi_ignore : 0
+
+Generating random data for matrix A
+Using 1.0-filled matrix data for matrix B
+PAPI library initialization succeeded with version: 84213760
+All provided codes exist on the platform
+PAPI event set creation succeeded
+PAPI add events succeeded
+PAPI proceeding with hardware counters available: 11
+
+label,size,total_micro_seconds,FLOPs,GFLOPs_per_second,order_name,transpose,max_threads,omp_schedule,omp_chunk_size,test_results,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_TOT_INS
+no-label,512,402742,268435456,0.666520,ijk,0,0,0,4206871,untested,136365329,134565635,5,1209799620
+
+PAPI counter [  PAPI_L1_DCM ] Level 1 data cache misses           = 136365329
+PAPI counter [  PAPI_L2_DCM ] Level 2 data cache misses           = 134565635
+PAPI counter [  PAPI_L3_TCM ] Level 3 cache misses                = 5
+PAPI counter [ PAPI_TOT_INS ] Instructions completed              = 1209799620
+
+Time to multiply : 402742 microseconds
+FLOPs/second     : 0.666520
+
+(hide these messages with --silent)

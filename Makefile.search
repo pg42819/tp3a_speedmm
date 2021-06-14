@@ -1,0 +1,106 @@
+# Use make VEC=yes to enable vector
+UNAME_S := $(shell uname -s)
+INTEL := no
+VEC := no
+DEBUG := no
+SOURCEDIR=src/
+TESTDIR=test/
+OUTDIR=bin/
+
+DEBUG_FLAGS=
+
+ifeq ($(DEBUG),yes)
+DEBUG_FLAGS=-DDEBUG -DPAPI_LOG_INFO=true -DPAPI_LOG_VERBOSE=true
+endif
+
+ifeq ($(OMP),yes)
+OMPFLAGS=-DMATRIX_OMP
+endif
+
+
+#DEBUG_FLAGS=-DTRACE
+#DEBUG_FLAGS=-DDEBUG -DTRACE
+# Uncomment this to get some OMP debug info like threads assigned etc
+#DEBUG_FLAGS=-DDEBUG_OMP
+
+ifeq ($(UNAME_S),Linux)
+# Papi libs and includes
+	INCLUDES=-I/share/apps/papi/5.5.0/include
+	LIBS=-L/share/apps/papi/5.5.0/lib -lpapi
+
+ifeq ($(INTEL),yes)
+# Intel
+# requires module load intel/2020
+# CANNOT be done on search node (no qsub -I before make)
+	CXX = icpc
+	LD  = icpc
+	OMP_FLAGS=-qopenmp $(OMP_EXTRA)
+#ifeq ($(VEC),yes)
+	CXXFLAGS_VECTOR  = -O3 -qopenmp -g -Wall -Wextra -std=c++11 -Wno-unused-parameter -qopt-report=5 -qopt-report-phase=vec $(DEBUG_FLAGS)
+#else
+	CXXFLAGS   = -O1 -qopenmp -g -Wall -Wextra -std=c++11 -Wno-unused-parameter -qopt-report=2 -qopt-report-phase=vec $(DEBUG_FLAGS)
+#endif
+#	include directories
+	# library directories
+	ifeq ($(DYNAMIC),yes)
+		CXXFLAGS += -DD_DYNAMIC
+	endif
+	ifeq ($(IRREGULAR),yes)
+		CXXFLAGS += -DD_IRREGULAR
+	endif
+else # Not Intel
+# GCC
+	CXX=gcc
+	OMP_FLAGS=-fopenmp $(OMP_EXTRA)
+	CXXFLAGS= -O3 -std=c99 $(OMP_FLAGS) $(INCLUDES) $(DEBUG_FLAGS) -march=native
+	# CXXFLAGS= -O1 -std=c99 -g $(DEBUG_FLAGS)
+endif
+endif # end Linux
+
+ifeq ($(UNAME_S),Darwin)
+# Mac OS
+CXX=/usr/local/bin/gcc-10
+MPICC=/opt/openmpi/bin/mpicc
+INCLUDES=
+# OPT: CXXFLAGS= -O3 -std=c99 -g -fopenmp $(INCLUDES) $(DEBUG_FLAGS)
+#CXXFLAGS= -O3 -std=c99 -g -fopenmp $(INCLUDES) $(DEBUG_FLAGS)
+OMP_FLAGS=-fopenmp $(OMP_EXTRA)
+CXXFLAGS= -std=c99 -g $(DEBUG_FLAGS)
+LIBS=
+endif
+
+
+.PHONY: all
+all: $(OUTDIR) matrix_1 matrix_2 #matrix_3 #matrix_4 #matrix_simple# papi_test
+# vector
+#all: $(OUTDIR) matrix_4 #matrix_simple# papi_test
+#all: $(OUTDIR) matrix_simple matrix_cuda
+
+matrix_1:
+	$(CXX) $(CXXFLAGS) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_1 $(SOURCEDIR)matrix.c \
+ 						  $(SOURCEDIR)matrix_simple_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+#block
+matrix_2:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)matrix_2 $(SOURCEDIR)matrix.c \
+ 						  $(SOURCEDIR)matrix_block_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+
+#vector
+matrix_3:
+	$(CXX) $(CXXFLAGS_VECTOR) $(INCLUDES) -o $(OUTDIR)matrix_3 $(SOURCEDIR)matrix.c \
+ 						 $(SOURCEDIR)matrix_vector_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+
+#OMP
+matrix_4:
+	$(CXX) $(CXXFLAGS_VECTOR) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_4 $(SOURCEDIR)matrix.c \
+ 						 $(SOURCEDIR)matrix_omp_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+
+#papi_test:
+#	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)papi_test $(TESTDIR)papi_test.c $(HEADERS) $(LIBS)
+
+$(OUTDIR):
+	mkdir $(OUTDIR)
+
+.PHONY: clean
+clean:
+	rm -r $(OUTDIR)
+
