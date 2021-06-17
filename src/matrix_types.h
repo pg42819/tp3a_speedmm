@@ -6,6 +6,8 @@
 
 // Global square matrix size
 #define N 4096
+// Calculate OPS second
+#define KNOWN_DPOPS 3400000000
 // How many rows to report progress on in verbose mode
 #define PROGRESS_GRANULARITY 100
 

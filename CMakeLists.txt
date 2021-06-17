@@ -16,6 +16,7 @@ set(OpenMP_C_FLAGS "-fopenmp")
 if (${APPLE})
     message ("MAC OS X")
     set(OpenMP_C_FLAGS "-fopenmp")
+#    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DN=9")
 endif()
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

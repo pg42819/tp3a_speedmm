@@ -3,6 +3,11 @@
 current_dir=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
 source ${current_dir}/set_env.sh
 
+#https://www.stefaanlippens.net/pretty-csv.html
+function pretty_print_csv {
+    perl -pe 's/((?<=,)|(?<=^)),/ ,/g;' "$@" | column -t -s, | less  -F -S -X -K
+}
+
 multirun() {
   echo "metrics report  :  ${metrics_file}"
   local program
@@ -131,8 +136,9 @@ fi
 if [ -n "${MATRIX_RUN_BLOCK}" ]; then
   order_arg_prefix="-b "
   if [ "${MATRIX_RUN_BLOCK}" == "loop" ]; then
-#    order_loop=( 4 8 16 32 64 128)
-    order_loop=( 16 128 256 512)
+#    order_loop=( 2 4 8 16 32 64 128 256 512)
+    # Based on 662 results with 4096
+    order_loop=( 64 64 64 64 64 64 32 32 128 128 128 256 512)
     echo "Looping block size over [${order_loop}]"
   else
     echo "Setting block size to [${MATRIX_RUN_BLOCK}]"
@@ -192,4 +198,4 @@ fi
 run_matrix
 
 askcontinue "Want to see the results?"
-cat ${metrics_file}
+pretty_print_csv ${metrics_file}

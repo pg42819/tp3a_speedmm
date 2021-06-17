@@ -451,13 +451,21 @@ int test_results(struct config *config, char *test_file_name, double matrix[][N]
         result = 1;
     }
     else {
+        int failures_reported = 0;
         for (size_t i = 0; i < N; ++i) {
             for (size_t j = 0; j < N; ++j) {
                 double diff = test_matrix[i][j] - matrix[i][j];
                 if (diff > FAILURE_THRESHOLD) {
+                    // report only the first 10 failures
                     if (!config->silent) {
-                        fprintf(stderr, "Test failure: result[%zu][%zu] %f does not match expected: %f (diff: %f)\n",
-                                i, j, matrix[i][j], test_matrix[i][j], diff);
+                        if (failures_reported++ < 10) {
+                            fprintf(stderr,
+                                    "Test failure: result[%zu][%zu] %f does not match expected: %f (diff: %f)\n",
+                                    i, j, matrix[i][j], test_matrix[i][j], diff);
+                        }
+                        else if (failures_reported == 10) {
+                            fprintf(stderr, "... and many more test failures\n");
+                        } // else don't report it
                     }
                     result = -1;
                     break; // give up comparing at first failure in this row - but do the other rows

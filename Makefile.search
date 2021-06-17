@@ -71,7 +71,7 @@ endif
 
 
 .PHONY: all
-all: $(OUTDIR) matrix_1 matrix_2 #matrix_3 #matrix_4 #matrix_simple# papi_test
+all: $(OUTDIR) matrix_1 matrix_2 matrix_3
 # vector
 #all: $(OUTDIR) matrix_4 #matrix_simple# papi_test
 #all: $(OUTDIR) matrix_simple matrix_cuda
@@ -82,17 +82,17 @@ matrix_1:
 #block
 matrix_2:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)matrix_2 $(SOURCEDIR)matrix.c \
- 						  $(SOURCEDIR)matrix_block_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+ 						  $(SOURCEDIR)matrix_omp_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
 #vector
 matrix_3:
 	$(CXX) $(CXXFLAGS_VECTOR) $(INCLUDES) -o $(OUTDIR)matrix_3 $(SOURCEDIR)matrix.c \
- 						 $(SOURCEDIR)matrix_vector_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+ 						 $(SOURCEDIR)matrix_block_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
 #OMP
 matrix_4:
 	$(CXX) $(CXXFLAGS_VECTOR) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_4 $(SOURCEDIR)matrix.c \
- 						 $(SOURCEDIR)matrix_omp_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+ 						 $(SOURCEDIR)matrix_vector_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
 #papi_test:
 #	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)papi_test $(TESTDIR)papi_test.c $(HEADERS) $(LIBS)

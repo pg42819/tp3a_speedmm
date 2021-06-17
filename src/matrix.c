@@ -3,6 +3,7 @@
 //#include <omp.h>
 #include "matrix.h"
 #include "matrix_support.c"
+#include <time.h>
 
 struct config *config;
 
@@ -22,6 +23,7 @@ long measurable_work(double matrix_a[][N], double matrix_b[][N], double result[]
 {
     long counted_flops = 0;
     DEBUG("Multiplying matrices");
+//    counted_flops = 1 + 1 + 1 + 1 + 1 + 1 + 1;  does papi make sense?
     counted_flops= dot_multiply_matrices(config->loop_order, matrix_a, matrix_b, result);
     DEBUG("Matrix multiplication involved %ld FLOPs", counted_flops);
 
@@ -34,13 +36,31 @@ long measurable_work(double matrix_a[][N], double matrix_b[][N], double result[]
             exit(1);
     }
 
-    return counted_flops;
+    return KNOWN_DPOPS; // counted_flops;
 }
 
-void measure(struct metrics *metrics, long long start_time, long long stop_time, long flops)
+void measure(struct metrics *metrics, long long papi_start_micros, long long papi_stop_micros,
+             double omp_start_s, double omp_stop_s, long flops, time_t alt_time_start)
 {
-    metrics->total_micro_seconds = stop_time - start_time;
+    long long start_micros, stop_micros;
+    if (papi_start_micros < 0) {
+        // using omp not papi  - convert to micro
+        start_micros = (long long) (omp_start_s * 1000000);
+        stop_micros = (long long) (omp_stop_s * 1000000);
+    }
+    else {
+        start_micros = papi_start_micros;
+        stop_micros = papi_stop_micros;
+    }
+    metrics->total_micro_seconds = stop_micros - start_micros;
+    // record the standard library time to compare
+    time_t alt_time_end;
+    time(&alt_time_end);
+    double alt_time_diff = difftime(alt_time_end, alt_time_start);
+    double omp_time_diff = (double)(stop_micros - start_micros) / 1000000.0f;
+    double discrepancy = omp_time_diff - alt_time_diff;
     DEBUG("Stop - Start   = %lld microseconds", metrics->total_micro_seconds);
+    printf("TIME CHECK omp: %.3lfs alt: %.3lfs discrepancy: %.3lfs\n", omp_time_diff, alt_time_diff, discrepancy);
     metrics->flops = flops;
 }
 
@@ -54,17 +74,18 @@ int run_timer_loops(unsigned timer_loop_count, struct metrics *metrics,
     for (unsigned work_loop_index = 0; work_loop_index < timer_loop_count; work_loop_index++) {
         fill_matrix_constant(dot_product, 0.0f);
         // start papi counters
-        long long start_time = get_papi_time();
-        DEBUG("Started PAPI at: %lld microseconds", start_time);
+        double start_time = omp_get_wtime();
+        DEBUG("Started OMP at: %.3lf seconds", start_time);
+        time_t alt_time_start;
+        time(&alt_time_start);
 
         // do the work of multiplying
         long counted_flops = measurable_work(matrix_a, matrix_b, dot_product);
 
-        // stop the counters
-        long long stop_time = get_papi_time();
-        DEBUG("Stopped PAPI at: %lld microseconds", stop_time);
+        double stop_time = omp_get_wtime();
+        DEBUG("Stopped OMP at: %.3lf microseconds", stop_time);
 
-        measure(metrics, start_time, stop_time, counted_flops);
+        measure(metrics, -1, -1, start_time, stop_time, counted_flops, alt_time_start);
     }
     return 0;
 }
@@ -102,6 +123,8 @@ int run_papi_loops(char* papi_arg, struct metrics *metrics, int *event_codes, lo
 
         // start papi counters
         long long start_time = start_papi(event_set);
+        time_t alt_time_start;
+        time(&alt_time_start);
         DEBUG("Started PAPI at: %lld microseconds", start_time);
 
         // do the work of multiplying
@@ -112,7 +135,7 @@ int run_papi_loops(char* papi_arg, struct metrics *metrics, int *event_codes, lo
         DEBUG("Stopped PAPI at: %lld microseconds", stop_time);
 
         if (measure_time) {
-            measure(metrics, start_time, stop_time, counted_flops);
+            measure(metrics, start_time, stop_time, -1.0f, -1.0f, counted_flops, alt_time_start);
         }
     }
     return total_event_count;
@@ -164,7 +187,7 @@ int main(int argc, char* argv []) {
 
     struct metrics metrics = new_metrics(config);
     metrics.size = N;
-    metrics.omp_max_threads = 0; //omp_get_max_threads();
+    metrics.omp_max_threads = omp_get_max_threads();
     // get kind: dynamic, static, auto.. and the chunk size
     metrics.omp_schedule_kind = 0;//omp_schedule_kind(&metnrics.omp_chunk_size);
 

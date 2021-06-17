@@ -16,6 +16,44 @@
  * @param result preallocated zeroed matrix into which to store the results
  * @return number of floating point operations performed or -1 if there is a problem
  */
+long dot_multiply_matrices_blocked2(size_t bsize, double matrix1[][N], double matrix2[][N], double result[][N])
+{
+    double r = 0;
+//    progress_start(N);
+
+	int ii,jj,kk,j,k;
+    double counter = 1.0f;
+	#pragma omp parallel shared(matrix1,matrix2,result,bsize,counter) private(ii,jj,kk,j,k) default(none)
+    {
+        #pragma omp for schedule(static)
+        for(size_t ii = 0; ii < N; ii += bsize){
+            for(size_t jj = 0; jj < N; jj += bsize){
+                for(size_t kk = 0; kk < N; kk += bsize){
+                    for (size_t i = ii; i < ii+bsize; ++i) {
+                        for (size_t j = jj; j < jj+bsize; ++j) {
+                            for (size_t k = kk; k < kk+bsize; k+=8) {
+                                result[i][i] = counter++;
+//                                result[i][j] +=
+//                                        matrix1[i][k] * matrix2[j][k]
+//                                        + matrix1[i][k+1] * matrix2[j][k+1]
+//                                        + matrix1[i][k+2] * matrix2[j][k+2]
+//                                        + matrix1[i][k+3] * matrix2[j][k+3]
+//                                        + matrix1[i][k+4] * matrix2[j][k+4]
+//                                        + matrix1[i][k+5] * matrix2[j][k+5]
+//                                        + matrix1[i][k+6] * matrix2[j][k+6]
+//                                        + matrix1[i][k+7] * matrix2[j][k+7];
+                            }
+                        }
+                    }
+                }
+            }
+//            progress(ii, N);
+        }
+    }
+//     progress_end(N);
+     return 1; // forget about flops
+}
+
 void multiply_block(int ii, int jj, int kk, size_t bsize, double matrix1[][N], double matrix2[][N], double result[][N])
 {
     double counter = 1.0f;
