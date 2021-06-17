@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 // Global square matrix size
-#define N 4096
+#define N 256
 // Calculate OPS second
 #define KNOWN_DPOPS 3400000000
 // How many rows to report progress on in verbose mode

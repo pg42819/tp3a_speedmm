@@ -22,15 +22,18 @@ void multiply_block(int ii, int jj, int kk, size_t bsize, double matrix1[][N], d
     {
         for (size_t i = ii; i < ii+bsize; ++i) {
             for (size_t j = jj; j < jj+bsize; ++j) {
-                for (size_t k = kk; k < kk+bsize; k+=8) {
-                    result[i][j] += matrix1[i][k] * matrix2[j][k]
-                            + matrix1[i][k+1] * matrix2[j][k+1]
-                            + matrix1[i][k+2] * matrix2[j][k+2]
-                            + matrix1[i][k+3] * matrix2[j][k+3]
-                            + matrix1[i][k+4] * matrix2[j][k+4]
-                            + matrix1[i][k+5] * matrix2[j][k+5]
-                            + matrix1[i][k+6] * matrix2[j][k+6]
-                            + matrix1[i][k+7] * matrix2[j][k+7];
+                for (size_t k = kk; k < kk+bsize; k+=4) {
+                    double a = matrix1[i][k] * matrix2[j][k];
+                    double b =  matrix1[i][k+1] * matrix2[j][k+1];
+                    double c =  matrix1[i][k+2] * matrix2[j][k+2];
+                    double d = matrix1[i][k+3] * matrix2[j][k+3];
+                    double sum = a  + b + c+ d;
+                    result[i][j] += sum;
+
+//                    result[i][j] += matrix1[i][k] * matrix2[j][k]
+//                            + matrix1[i][k+1] * matrix2[j][k+1]
+//                            + matrix1[i][k+2] * matrix2[j][k+2]
+//                            + matrix1[i][k+3] * matrix2[j][k+3];
                 }
             }
         }
@@ -40,23 +43,11 @@ void multiply_block(int ii, int jj, int kk, size_t bsize, double matrix1[][N], d
 long dot_multiply_matrices_blocked(size_t bsize, double matrix1[][N], double matrix2[][N], double result[][N])
 {
 //    progress_start(N);
-
-//	#pragma omp parallel shared(matrix1,matrix2,result,bsize,counter) private(ii,jj,kk,j,k) default(none)
-// https://stackoverflow.com/questions/19741799/what-is-a-right-way-to-use-task-directive-in-openmp
-#pragma omp parallel shared(matrix1, matrix2, result, bsize)
-//default(none)
     {
-#pragma omp single
         {
             for (size_t ii = 0; ii < N; ii += bsize) {
                 for (size_t jj = 0; jj < N; jj += bsize) {
                     for (size_t kk = 0; kk < N; kk += bsize) {
-// from https://www.openmp.org/wp-content/uploads/openmp-examples-5.0.0.pdf
-//#pragma omp task default(none) shared(matrix1, matrix2, result, bsize)
-#pragma omp task shared(matrix1, matrix2, result, bsize)  \
-    firstprivate(ii, jj, kk) \
-    depend(in: matrix1[ii:bsize][kk:bsize], matrix2[kk:bsize][jj:bsize]) \
-    depend(inout: result[ii:bsize][jj:bsize])
                         multiply_block(ii, jj, kk, bsize, matrix1, matrix2, result);
                     }
                 }

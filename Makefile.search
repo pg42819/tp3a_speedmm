@@ -71,31 +71,31 @@ endif
 
 
 .PHONY: all
-all: $(OUTDIR) matrix_1 matrix_2 matrix_3
-# vector
-#all: $(OUTDIR) matrix_4 #matrix_simple# papi_test
-#all: $(OUTDIR) matrix_simple matrix_cuda
+all: $(OUTDIR) matrix_1 matrix_2 matrix_3 matrix_4
 
+# sequential - with interchange
 matrix_1:
 	$(CXX) $(CXXFLAGS) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_1 $(SOURCEDIR)matrix.c \
  						  $(SOURCEDIR)matrix_simple_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
-#block
+
+# block
+matrix_3:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)matrix_3 $(SOURCEDIR)matrix.c \
+ 						 $(SOURCEDIR)matrix_block_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
+
+# block and omp
 matrix_2:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)matrix_2 $(SOURCEDIR)matrix.c \
  						  $(SOURCEDIR)matrix_omp_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
-#vector
-matrix_3:
-	$(CXX) $(CXXFLAGS_VECTOR) $(INCLUDES) -o $(OUTDIR)matrix_3 $(SOURCEDIR)matrix.c \
- 						 $(SOURCEDIR)matrix_block_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
-
-#OMP
+# block and omp and vctor
 matrix_4:
-	$(CXX) $(CXXFLAGS_VECTOR) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_4 $(SOURCEDIR)matrix.c \
+	$(CXX) $(CXXFLAGS) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_4 $(SOURCEDIR)matrix.c \
  						 $(SOURCEDIR)matrix_vector_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
-#papi_test:
-#	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(OUTDIR)papi_test $(TESTDIR)papi_test.c $(HEADERS) $(LIBS)
+#matrix_4:
+#	$(CXX) $(CXXFLAGS_VECTOR) $(OMP_FLAGS) $(INCLUDES) -o $(OUTDIR)matrix_4 $(SOURCEDIR)matrix.c \
+ #						 $(SOURCEDIR)matrix_vector_impl.c $(SOURCEDIR)csvhelper.c $(HEADERS) $(LIBS)
 
 $(OUTDIR):
 	mkdir $(OUTDIR)

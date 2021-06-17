@@ -16,14 +16,14 @@ set(OpenMP_C_FLAGS "-fopenmp")
 if (${APPLE})
     message ("MAC OS X")
     set(OpenMP_C_FLAGS "-fopenmp")
-#    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DN=9")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
 endif()
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 
 add_executable(matrix_1 src/matrix.c src/matrix_simple_impl.c src/csvhelper.c)
-add_executable(matrix_2 src/matrix.c src/matrix_block_impl.c src/csvhelper.c)
-add_executable(matrix_3 src/matrix.c src/matrix_vector_impl.c src/csvhelper.c)
-add_executable(matrix_4 src/matrix.c src/matrix_omp_impl.c src/csvhelper.c)
+add_executable(matrix_3 src/matrix.c src/matrix_block_impl.c src/csvhelper.c)
+add_executable(matrix_4 src/matrix.c src/matrix_vector_impl.c src/csvhelper.c)
+add_executable(matrix_2 src/matrix.c src/matrix_omp_impl.c src/csvhelper.c)
 add_executable(heap_matrix_test test/heap_matrix_test.c)
 
